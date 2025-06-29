@@ -1,28 +1,21 @@
 using System;
+using Common.Variables;
+using UnityEngine;
 
-namespace EndlessRunner
+namespace EndlessRunner.Characters
 {
-    public struct Transition
+    [Serializable]
+    public class Transition
     {
-        public BaseState To { get; }
-        public Condition Condition { get; }
-
-        public Transition(BaseState to, Condition condition)
-        {
-            To = to;
-            Condition = condition;           
-        }
+        public BaseStateSO to;
+        public Condition condition;
     }
     
-    public struct Condition
+    [Serializable]
+    public class Condition
     {
-        readonly Func<bool> func;
+        [SerializeField] BoolVariableSO variable;
 
-        public Condition(Func<bool> func)
-        {
-            this.func = func;
-        }
-
-        public bool IsMet => func() == true;
+        public bool IsMet => variable.Value;
     }
 }

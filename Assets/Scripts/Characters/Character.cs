@@ -1,29 +1,27 @@
 using System;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
-namespace EndlessRunner
+namespace EndlessRunner.Characters
 {
     public class Character : MonoBehaviour
     {
-        readonly StateMachine stateMachine = new StateMachine();
-        public BaseState initialState;
+    #region References
+        public Animator animator;
+    #endregion
+        [Header( "State Machine" )]
+        [SerializeField, Required] BaseStateSO initialState;
+        StateMachine stateMachine;
 
-        BaseState _runState, _jumpState;
-        void Start()
+        void Awake()
         {
-            _runState = new RunState(this);
-            _jumpState = new JumpState(this);
-            
-            AddTransition(_runState, _jumpState, () => Input.GetKeyDown(KeyCode.A));
-            AddTransition(_jumpState, _runState, () => Input.GetKeyDown(KeyCode.D));
-            
-            initialState = _runState;
-            stateMachine.Start(initialState);
+            stateMachine = new StateMachine(this);
+            animator = GetComponent<Animator>();
         }
 
-        void AddTransition(BaseState from, BaseState to, Func<bool> func)
+        void Start()
         {
-            from.AddTransition(new Transition(to, new Condition(func)));
+            stateMachine.Start(initialState);
         }
         void Update()
         {

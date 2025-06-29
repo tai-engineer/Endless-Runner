@@ -1,28 +1,37 @@
 using UnityEngine;
 
-namespace EndlessRunner
+namespace EndlessRunner.Characters
 {
     public class StateMachine
     {
-        public BaseState CurrentState { get; private set; }
+        public BaseStateSO CurrentState { get; private set; }
+    
+        Character character;
+        public StateMachine(Character character) => this.character = character;
+        public void Start(BaseStateSO initialState)
+        {
+            Debug.Log($"State Machine started\n Initial State: {initialState.name}");
+            SetState(initialState);
+        }
         public void Update()
         {
+            if (CurrentState == null)
+            {
+                Debug.LogError("State Machine is not initialized.");
+                return;
+            }
             if (CurrentState.GetTransition(out var transition))
             {
-                TransitionToState(transition.To);
+                TransitionToState(transition.to);
             }
-            CurrentState.OnUpdate();
-        }
-        public void Start(BaseState initialState)
-        {
-            SetState(initialState);
+            CurrentState.OnUpdate(character);
         }
 
         /// <summary>
         /// Assigns new state to current state
         /// </summary>
         /// <param name="newState"></param>
-        void SetState(BaseState newState)
+        void SetState(BaseStateSO newState)
         {
             if (newState == null)
             {
@@ -30,8 +39,7 @@ namespace EndlessRunner
                 return;
             }
             CurrentState = newState;
-            Debug.Log("State changed to " + CurrentState.GetType().Name);
-            CurrentState.OnEnter();
+            CurrentState.OnEnter(character);
         }
 
         /// <summary>
@@ -45,12 +53,13 @@ namespace EndlessRunner
         /// and then calls <c>OnEnter</c> on the new state. If <paramref name="newState"/> is null
         /// or identical to the current state, the method does nothing to prevent unnecessary transitions.
         /// </remarks>
-        void TransitionToState(BaseState newState)
+        void TransitionToState(BaseStateSO newState)
         {
             if (newState == null || CurrentState == newState)
                 return;
-            CurrentState.OnExit();
+            CurrentState.OnExit(character);
             SetState(newState);
+            Debug.Log("State changed to " + CurrentState.GetType().Name);
         }
     }
 }
